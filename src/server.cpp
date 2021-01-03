@@ -3,7 +3,7 @@
 //
 #include "server.h"
 
-bool ServerUp(int port){
+bool ServerUp(int port, std::ifstream &log){
     try{
         socket.bind(host + std::to_string(port));
     }
@@ -11,6 +11,14 @@ bool ServerUp(int port){
         std::cout << "Port is unavailable!" << std::endl;
         return false;
     }
+    static int id, second_id;
+    static std::string filename;
+    while(log){
+        log >> id >> second_id >> filename;
+        auto *uniqueId = new messageId(id, second_id, filename);
+        messageQueue.push_back(*uniqueId);
+    }
+    messageIndex = second_id + 1;
     std::cout << "Set up successful!" << std::endl;
     return true;
 }
@@ -107,7 +115,7 @@ void DeleteMessage(){
     messageQueue.pop_front();
 }
 
-void SendReply(std::ofstream log){
+void SendReply(std::ofstream &log){
     std::string request = ReceiveRequest();
     std::istringstream in(request);
     static int type;
@@ -188,5 +196,6 @@ void SendReply(std::ofstream log){
         std::string response = std::to_string(port);
         SendData(response);
         SendMessages(socket, id);
+        socketMessages.unbind(host+std::to_string(port));
     }
 }

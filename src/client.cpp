@@ -118,7 +118,7 @@ void RequestMessages(int id){
         if(c != EOF) {
             c = 0;
         }
-        filename = std::to_string(id) + "_" + std::to_string(messageId) + ".txt";
+        filename = dirName + '/' + std::to_string(id) + "_" + std::to_string(messageId) + ".txt";
         std::ofstream out(filename, std::ios::app);
         out << buf;
     }

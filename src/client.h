@@ -19,7 +19,6 @@ zmqpp::context context;
 zmqpp::socket sendSocket(context, zmqpp::socket_type::req);
 zmqpp::socket receiveSocket(context, zmqpp::socket_type::pull);
 void SendMessage(int id, std::string &message);
-void SendDirName(std::string &name);
 void SendData(std::string &messageString);
 std::string ReceiveData();
 void SendBigMessage(int id, std::string &filename);
@@ -27,5 +26,4 @@ void RequestMessages(int id);
 bool ConnectToServer(std::string &address, int port);
 int BindSocket(zmqpp::socket &socket);
 std::string ReceiveData(zmqpp::socket &argSocket);
-void ReceiveMessages();
 #endif //KP_OS_CLIENT_H
