@@ -17,6 +17,7 @@ int BindSocket(zmqpp::socket &socket){
 
 bool ConnectToServer(std::string &address, int port){
     std::string connect = "tcp://" + address + ":" + std::to_string(port);
+    std::string host = "tcp://" + address + ":";
     try{
         sendSocket.connect(connect);
     }
@@ -62,10 +63,9 @@ void SendBigMessage(int id, std::string &filename){
     static char c;
     static std::string buf;
     while(c != EOF){
-        int count = 0;
         c = 0;
         buf.clear();
-        while(count < 256){
+        for(int i = 0; i < 256; ++i){
             c = (char)in.get();
             if(c != EOF) {
                 buf += c;
@@ -73,7 +73,6 @@ void SendBigMessage(int id, std::string &filename){
             else {
                 break;
             }
-            ++count;
         }
         if(c != EOF) {
             c = 0;
@@ -86,12 +85,61 @@ void SendBigMessage(int id, std::string &filename){
 
 void RequestMessages(int id){
     std::string request = std::to_string(Receive) + " " + std::to_string(id);
+    std::string port = ReceiveData();
+    try{
+        receiveSocket.connect(host+port);
+    }
+    catch(zmqpp::zmq_internal_exception& e){
+        std::cout << "Internal error!" << std::endl;
+        return;
+    }
+    static std::string filename;
+    int messageId = 0;
+    static std::string buf = "";
+    static char c = 0;
+    while(true){
+        std::string response = ReceiveData(receiveSocket);
+        std::istringstream in(response);
+        in >> messageId;
+        if(messageId == -1){
+            break;
+        }
+        c = 0;
+        buf.clear();
+        for(int i = 0; i < 256; ++i){
+            c = (char)in.get();
+            if(c != EOF) {
+                buf += c;
+            }
+            else {
+                break;
+            }
+        }
+        if(c != EOF) {
+            c = 0;
+        }
+        filename = std::to_string(id) + "_" + std::to_string(messageId) + ".txt";
+        std::ofstream out(filename, std::ios::app);
+        out << buf;
+    }
 }
 
 std::string ReceiveData(){
     zmqpp::message message;
     try {
         sendSocket.receive(message);
+    } catch(zmqpp::zmq_internal_exception& e) {
+        message = false;
+    }
+    std::string request;
+    message >> request;
+    return request;
+}
+
+std::string ReceiveData(zmqpp::socket &argSocket){
+    zmqpp::message message;
+    try {
+        argSocket.receive(message);
     } catch(zmqpp::zmq_internal_exception& e) {
         message = false;
     }

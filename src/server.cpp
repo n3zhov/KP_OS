@@ -28,8 +28,7 @@ void SendMessages(zmqpp::socket &socketMessages, int id){
             while(c != EOF){
                 c = 0;
                 buf.clear();
-                int count = 0;
-                while(count < 256){
+                for(int i = 0; i < 256; ++i){
                     c = (char)in.get();
                     if(c != EOF) {
                         buf += c;
@@ -37,7 +36,6 @@ void SendMessages(zmqpp::socket &socketMessages, int id){
                     else {
                         break;
                     }
-                    ++count;
                 }
                 if(c != EOF) {
                     c = 0;
@@ -48,6 +46,8 @@ void SendMessages(zmqpp::socket &socketMessages, int id){
         }
         ++it;
     }
+    std::string message = std::to_string(-1);
+    SendData(message, socketMessages);
 }
 
 int BindSocket(zmqpp::socket &socketMessages){

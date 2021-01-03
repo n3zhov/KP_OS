@@ -13,7 +13,7 @@ enum Operation{
     BigSend, //1
     Receive //2
 };
-const std::string host = "tcp://127.0.0.1:";
+const std::string host = "";
 std::string dirName = "";
 zmqpp::context context;
 zmqpp::socket sendSocket(context, zmqpp::socket_type::req);
@@ -26,5 +26,6 @@ void SendBigMessage(int id, std::string &filename);
 void RequestMessages(int id);
 bool ConnectToServer(std::string &address, int port);
 int BindSocket(zmqpp::socket &socket);
+std::string ReceiveData(zmqpp::socket &argSocket);
 void ReceiveMessages();
 #endif //KP_OS_CLIENT_H
