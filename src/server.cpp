@@ -24,6 +24,7 @@ void SendMessages(zmqpp::socket &socketMessages, int id){
         if((*it).id == id){
             std::ifstream in((*it).filename);
             c = 0;
+            buf.clear();
             while(c != EOF){
                 int count = 0;
                 while(count < 256){
@@ -127,6 +128,7 @@ void SendReply(std::ofstream log){
         auto *uniqueId = new messageId(id, messageIndex, filename);
         messageQueue.push_back(*uniqueId);
         std::ofstream out(filename, std::ios::out);
+        log << id << " " << messageIndex << " " << filename << "\n";
         out << id << " " << messageIndex << "\n" << message;
         ++messageIndex;
         ++queueSize;
@@ -134,6 +136,8 @@ void SendReply(std::ofstream log){
             DeleteMessage();
             --queueSize;
         }
+        std::string reply = std::to_string(1);
+        SendData(reply);
         return;
     }
     if(type == BigSend){
@@ -143,6 +147,7 @@ void SendReply(std::ofstream log){
 
             filename = "messages/" + std::to_string(id) + "_" + std::to_string(secondId) + ".txt";
             std::ofstream out(filename);
+            log << id << " " << messageIndex << " " << filename << "\n";
             out << id << " " << secondId << "\n";
 
             auto *uniqueId = new messageId(id, messageIndex, filename);
@@ -156,6 +161,8 @@ void SendReply(std::ofstream log){
                 DeleteMessage();
                 --queueSize;
             }
+            std::string reply = std::to_string(1);
+            SendData(reply);
             return;
         }
         else{
@@ -170,6 +177,8 @@ void SendReply(std::ofstream log){
             c = 0;
             out << message;
             out.close();
+            std::string reply = std::to_string(1);
+            SendData(reply);
             return;
         }
     }
