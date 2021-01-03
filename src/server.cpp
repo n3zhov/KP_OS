@@ -26,6 +26,8 @@ void SendMessages(zmqpp::socket &socketMessages, int id){
             c = 0;
             buf.clear();
             while(c != EOF){
+                c = 0;
+                buf.clear();
                 int count = 0;
                 while(count < 256){
                     c = (char)in.get();
@@ -74,11 +76,11 @@ std::string ReceiveRequest(){
     return request;
 }
 
-void SendData(std::string &messageString, zmqpp::socket &socket){
+void SendData(std::string &messageString, zmqpp::socket &socketSend){
     zmqpp::message message;
     message >> messageString;
     try {
-        socket.send(message);
+        socketSend.send(message);
     } catch(zmqpp::zmq_internal_exception& e) {
         message = false;
     }
@@ -161,8 +163,6 @@ void SendReply(std::ofstream log){
                 DeleteMessage();
                 --queueSize;
             }
-            std::string reply = std::to_string(1);
-            SendData(reply);
             return;
         }
         else{
@@ -190,14 +190,3 @@ void SendReply(std::ofstream log){
         SendMessages(socket, id);
     }
 }
-/*std::string recieve_msg(zmqpp::socket& socket) {
-    zmqpp::message message;
-    try {
-        socket.receive(message);
-    } catch(zmqpp::zmq_internal_exception& e) {
-        message = false;
-    }
-    std::string answer;
-    message >> answer;
-    return answer;
-}*/

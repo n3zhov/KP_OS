@@ -39,7 +39,7 @@ void SendMessages(zmqpp::socket &socketMessages, int id);
 void SendReply(std::ofstream log);
 std::string ReceiveRequest();
 void SendData(std::string &messageString);
-void SendData(std::string &messageString, zmqpp::socket &socket);
+void SendData(std::string &messageString, zmqpp::socket &socketSend);
 int BindSocket(zmqpp::socket &socketMessages);
 void DeleteMessage();
 #endif //KP_OS_SERVER_EXEC_H
