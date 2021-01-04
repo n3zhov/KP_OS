@@ -17,22 +17,22 @@ add_executable(client_exec client_exec.cpp)
 
 
 add_library(
-        server SHARED
+        server STATIC
         src/server.cpp
 )
 
 
 add_library(
-        client SHARED
+        client STATIC
         src/client.cpp
 )
 
 set_target_properties(client PROPERTIES
-        PUBLIC_HEADER src/client.h
+        PRIVATE_HEADER src/client.h
         )
 
 set_target_properties(server PROPERTIES
-        PUBLIC_HEADER src/server.h
+        PRIVATE_HEADER src/server.h
         )
 
 target_include_directories(server PUBLIC ${ZMQ_INCLUDE_DIR})
