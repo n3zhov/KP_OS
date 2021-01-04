@@ -7,7 +7,7 @@ struct ThreadToken{
 [[noreturn]] void* ThreadFunc(void* token){
     auto* tok = (ThreadToken*) token;
     while(true){
-        SendReply(reinterpret_cast<std::ofstream &>(tok->log));
+        SendReply(((*tok->log)));
     }
 }
 int main(int argc, char* argv[]) {
@@ -16,10 +16,12 @@ int main(int argc, char* argv[]) {
         std::cout << "Wrong count of arguments!" << std::endl;
         return 0;
     }
-    if(argc == 3){
-        maxSize = std::stoi(argv[2]);
+    std::ifstream config("config.txt");
+    if(config.is_open()){
+        config >> maxSize;
     }
-    auto *log = new std::ofstream(argv[1]);
+    config.close();
+    auto *log = new std::ofstream(argv[1], std::ios::app);
     auto *log_in = new std::ifstream(argv[1]);
     ThreadToken token;
     token.log = log;
@@ -29,10 +31,11 @@ int main(int argc, char* argv[]) {
         std::cin >> cmd;
         if(cmd == "server.out"){
             std::cin >> port;
-            ServerUp(port, reinterpret_cast<std::ifstream &>(log_in));
+            ServerUp(port, ((*log_in)));
             pthread_create(&thread, nullptr, ThreadFunc, &token);
         }
         else if(cmd == "server.down"){
+            pthread_cancel(thread);
             log->close();
             log_in->close();
             return 0;

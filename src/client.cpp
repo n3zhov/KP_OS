@@ -17,7 +17,7 @@ int BindSocket(zmqpp::socket &socket){
 
 bool ConnectToServer(std::string &address, int port){
     std::string connect = "tcp://" + address + ":" + std::to_string(port);
-    std::string host = "tcp://" + address + ":";
+    host = "tcp://" + address + ":";
     try{
         sendSocket.connect(connect);
     }
@@ -30,9 +30,19 @@ bool ConnectToServer(std::string &address, int port){
 
 void SendData(std::string &messageString){
     zmqpp::message message;
-    message >> messageString;
+    message << messageString;
     try {
         sendSocket.send(message);
+    } catch(zmqpp::zmq_internal_exception& e) {
+        message = false;
+    }
+}
+
+void SendData(std::string &messageString, zmqpp::socket &argSocket){
+    zmqpp::message message;
+    message << messageString;
+    try {
+        argSocket.send(message);
     } catch(zmqpp::zmq_internal_exception& e) {
         message = false;
     }
@@ -45,21 +55,14 @@ void SendMessage(int id, std::string &message){
 }
 
 void SendBigMessage(int id, std::string &filename){
-    std::string request = std::to_string(BigSend) + " " + std::to_string(-1);
+    std::string request = std::to_string(BigSend) + " " + std::to_string(id) + " " + std::to_string(-1);
     SendData(request);
 
     int messageId;
     std::string reply = ReceiveData();
     std::istringstream getId(reply);
     getId >> messageId;
-    std::ifstream in;
-    try{
-        in.open(filename);
-    }
-    catch(...){
-        std::cout << "Error opening file!" << std::endl;
-        return;
-    }
+    std::ifstream in(filename);
     static char c;
     static std::string buf;
     while(c != EOF){
@@ -77,7 +80,7 @@ void SendBigMessage(int id, std::string &filename){
         if(c != EOF) {
             c = 0;
         }
-        std::string message = std::to_string(messageId) + " " + buf;
+        std::string message = std::to_string(BigSend) + " " + std::to_string(id) + " " + std::to_string(messageId) + " " + buf;
         SendData(message);
         reply = ReceiveData();
     }
@@ -85,14 +88,12 @@ void SendBigMessage(int id, std::string &filename){
 
 void RequestMessages(int id){
     std::string request = std::to_string(Receive) + " " + std::to_string(id);
-    std::string port = ReceiveData();
-    try{
-        receiveSocket.connect(host+port);
-    }
-    catch(zmqpp::zmq_internal_exception& e){
-        std::cout << "Internal error!" << std::endl;
-        return;
-    }
+    SendData(request);
+    std::string reply = ReceiveData();
+    int port = BindSocket(receiveSocket);
+    request = host+std::to_string(port);
+    SendData(request);
+    request = ReceiveData();
     static std::string filename;
     int messageId = 0;
     static std::string buf = "";
@@ -102,9 +103,12 @@ void RequestMessages(int id){
         std::istringstream in(response);
         in >> messageId;
         if(messageId == -1){
+            std::string reply = std::to_string(1);
+            SendData(reply, receiveSocket);
             break;
         }
         c = 0;
+        in.get();
         buf.clear();
         for(int i = 0; i < 256; ++i){
             c = (char)in.get();
@@ -118,9 +122,16 @@ void RequestMessages(int id){
         if(c != EOF) {
             c = 0;
         }
-        filename = dirName + '/' + std::to_string(id) + "_" + std::to_string(messageId) + ".txt";
+        if(!dirName.empty()) {
+            filename = dirName + '/' + std::to_string(id) + "_" + std::to_string(messageId) + ".txt";
+        }
+        else{
+            filename = std::to_string(id) + "_" + std::to_string(messageId) + ".txt";
+        }
         std::ofstream out(filename, std::ios::app);
         out << buf;
+        std::string reply = std::to_string(1);
+        SendData(reply, receiveSocket);
     }
 }
 
@@ -148,6 +159,6 @@ std::string ReceiveData(zmqpp::socket &argSocket){
     return request;
 }
 
-void SetDirName(std::string &name){
-    dirName = name;
+void SetDir(std::string dir){
+    dirName = dir;
 }

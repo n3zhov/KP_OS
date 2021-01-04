@@ -50,6 +50,7 @@ void SendMessages(zmqpp::socket &socketMessages, int id){
                 }
                 std::string message = std::to_string((*it).second_id) + " " + buf;
                 SendData(message, socketMessages);
+                std::string reply = ReceiveRequest(socketMessages);
             }
         }
         ++it;
@@ -84,9 +85,21 @@ std::string ReceiveRequest(){
     return request;
 }
 
+std::string ReceiveRequest(zmqpp::socket &receiveSocket){
+    zmqpp::message message;
+    try {
+        receiveSocket.receive(message);
+    } catch(zmqpp::zmq_internal_exception& e) {
+        message = false;
+    }
+    std::string request;
+    message >> request;
+    return request;
+}
+
 void SendData(std::string &messageString, zmqpp::socket &socketSend){
     zmqpp::message message;
-    message >> messageString;
+    message << messageString;
     try {
         socketSend.send(message);
     } catch(zmqpp::zmq_internal_exception& e) {
@@ -96,7 +109,7 @@ void SendData(std::string &messageString, zmqpp::socket &socketSend){
 
 void SendData(std::string &messageString){
     zmqpp::message message;
-    message >> messageString;
+    message << messageString;
     try {
         socket.send(message);
     } catch(zmqpp::zmq_internal_exception& e) {
@@ -126,20 +139,16 @@ void SendReply(std::ofstream &log){
     static std::string filename;
     in >> type;
     in >> id;
+    message.clear();
     if(type == Send){
-        c = 0;
-        while (c != EOF){
-            c = (char)in.get();
-            if(c != EOF)
-                message += c;
-        }
-        c = 0;
+        in.get();
+        getline(in, message);
         filename = "messages/" + std::to_string(id) + "_" + std::to_string(messageIndex) + ".txt";
         auto *uniqueId = new messageId(id, messageIndex, filename);
         messageQueue.push_back(*uniqueId);
-        std::ofstream out(filename, std::ios::out);
+        std::ofstream out(filename);
         log << id << " " << messageIndex << " " << filename << "\n";
-        out << id << " " << messageIndex << "\n" << message;
+        out << message;
         ++messageIndex;
         ++queueSize;
         if(queueSize == maxSize){
@@ -158,7 +167,6 @@ void SendReply(std::ofstream &log){
             filename = "messages/" + std::to_string(id) + "_" + std::to_string(secondId) + ".txt";
             std::ofstream out(filename);
             log << id << " " << messageIndex << " " << filename << "\n";
-            out << id << " " << secondId << "\n";
 
             auto *uniqueId = new messageId(id, messageIndex, filename);
             messageQueue.push_back(*uniqueId);
@@ -177,6 +185,7 @@ void SendReply(std::ofstream &log){
             filename = "messages/" + std::to_string(id) + "_" + std::to_string(secondId) + ".txt";
             std::ofstream out(filename, std::ios::app);
             c = 0;
+            in.get();
             while (c != EOF){
                 c = (char)in.get();
                 if(c != EOF)
@@ -191,11 +200,13 @@ void SendReply(std::ofstream &log){
         }
     }
     if(type == Receive){
-        zmqpp::socket socketMessages(context, zmqpp::socket_type::push);
-        int port = BindSocket(socketMessages);
-        std::string response = std::to_string(port);
+        auto *socketMessages = new zmqpp::socket(context, zmqpp::socket_type::req);
+        std::string response = std::to_string(1);
         SendData(response);
-        SendMessages(socket, id);
-        socketMessages.unbind(host+std::to_string(port));
+        std::string address = ReceiveRequest();
+        socketMessages->connect(address);
+        response = std::to_string(1);
+        SendData(response);
+        SendMessages((*socketMessages), id);
     }
 }

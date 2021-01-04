@@ -35,6 +35,7 @@ static zmqpp::context context;
 static zmqpp::socket socket(context, zmqpp::socket_type::rep);
 const std::string host = "tcp://127.0.0.1:";
 bool ServerUp(int port, std::ifstream &log);
+std::string ReceiveRequest(zmqpp::socket &receiveSocket);
 void SendMessages(zmqpp::socket &socketMessages, int id);
 void SendReply(std::ofstream &log);
 std::string ReceiveRequest();
