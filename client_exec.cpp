@@ -24,7 +24,12 @@ int main(int argc, char* argv[]){
                 std::string address;
                 std::cout << "Enter IP address and port to connect" << std::endl;
                 std::cin >> address >> port;
-                ConnectToServer(address, port);
+                if(ConnectToServer(address, port)){
+                    std::cout << "Connection successful!" << std::endl;
+                }
+                else{
+                    std::cout << "Error!" << std::endl;
+                }
                 break;
             }
             case 2:{
@@ -36,6 +41,7 @@ int main(int argc, char* argv[]){
                 getline(std::cin, message);
                 if(sendSocket){
                     SendMessage(id, message);
+                    std::cout << "Message delivered!" << std::endl;
                 }
                 else{
                     std::cout << "Something wrong with connection!" << std::endl;
@@ -51,6 +57,7 @@ int main(int argc, char* argv[]){
                 getline(std::cin, filename);
                 if(sendSocket){
                     SendBigMessage(id, filename);
+                    std::cout << "Message delivered!" << std::endl;
                 }
                 else{
                     std::cout << "Something wrong with connection!" << std::endl;

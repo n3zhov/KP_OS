@@ -18,9 +18,16 @@ bool ServerUp(int port, std::ifstream &log){
         auto *uniqueId = new messageId(id, second_id, filename);
         messageQueue.push_back(*uniqueId);
     }
+    ResizeQueue();
     messageIndex = second_id + 1;
     std::cout << "Set up successful!" << std::endl;
     return true;
+}
+
+void ResizeQueue(){
+    while (messageQueue.size() > maxSize){
+        DeleteMessage();
+    }
 }
 
 void SendMessages(zmqpp::socket &socketMessages, int id){
@@ -126,6 +133,10 @@ void DeleteMessage(){
         std::cout << "Some error!" << std::endl;
     }
     messageQueue.pop_front();
+}
+
+void SetMaxSize(int size){
+    maxSize = size;
 }
 
 void SendReply(std::ofstream &log){

@@ -17,8 +17,10 @@ int main(int argc, char* argv[]) {
         return 0;
     }
     std::ifstream config("config.txt");
+    int size = 0;
     if(config.is_open()){
-        config >> maxSize;
+        config >> size;
+        SetMaxSize(size);
     }
     config.close();
     auto *log = new std::ofstream(argv[1], std::ios::app);
@@ -45,3 +47,5 @@ int main(int argc, char* argv[]) {
         }
     }
 }
+
+
