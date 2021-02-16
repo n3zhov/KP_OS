@@ -8,8 +8,8 @@ find_package(Threads REQUIRED)
 
 set(ZMQ_INCLUDE_DIR /usr/local/include)
 
-find_library(cZeroMQ NAMES zmq PATHS /usr/local/lib)
-find_library(ZeroMQ NAMES zmqpp PATHS /usr/local/lib)
+find_library(cZeroMQ NAMES zmq PATHS /usr/lib)
+find_library(ZeroMQ NAMES zmqpp PATHS /usr/lib)
 
 
 add_executable(server_exec server_exec.cpp)
