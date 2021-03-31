@@ -8,10 +8,15 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <string>
 enum Operation{
     Send, //0
-    BigSend, //1
-    Receive //2
+    Receive //1
+};
+class Client{
+private:
+  void RequestMessages(std::string id);
+  void ReceiveData();
 };
 static std::string host = "";
 static std::string dirName = "";

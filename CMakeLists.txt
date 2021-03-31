@@ -1,15 +1,15 @@
 cmake_minimum_required(VERSION 3.17)
 project(KP_OS)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-set(ZMQ_INCLUDE_DIR /usr/local/include)
+set(ZMQ_INCLUDE_DIR /usr/include/zmqpp)
 
-find_library(cZeroMQ NAMES zmq PATHS /usr/lib)
-find_library(ZeroMQ NAMES zmqpp PATHS /usr/lib)
+find_library(cZeroMQ NAMES zmq PATHS /usr/lib/x86_64-linux-gnu)
+find_library(ZeroMQ NAMES zmqpp PATHS /usr/lib/x86_64-linux-gnu)
 
 
 add_executable(server_exec server_exec.cpp)
@@ -49,3 +49,4 @@ target_link_libraries(client ${ZeroMQ} ${cZeroMQ} Threads::Threads)
 
 target_link_libraries(client_exec client)
 target_link_libraries(server_exec server)
+
