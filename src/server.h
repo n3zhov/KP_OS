@@ -15,7 +15,6 @@
 #include <map>
 #include <vector>
 #include <algorithm>
-
 enum Operation{
     Send, //0
     Receive //1
@@ -26,6 +25,8 @@ private:
     const std::string host = "tcp://127.0.0.1:";
     long long maxSize = 100;
     long long currentSize = 0;
+    void SendData(std::string &messageString);
+    std::string ReceiveData();
     pthread_t thread;
     [[noreturn]] void* ThreadFunc();
     zmqpp::context context;
@@ -34,9 +35,7 @@ private:
     //Очередь для хранения порядка добавления сообщений
     std::list<std::string> orderQueue;
     bool ServerUp(int port);
-    void SendData(std::string &messageString);
     void SendReply();
-    std::string ReceiveRequest();
 public:
     Server(int port);
     Server(int port, long long maxSize);

@@ -13,24 +13,22 @@ enum Operation{
     Send, //0
     Receive //1
 };
-class Client{
+class Connection{
 private:
-  void RequestMessages(std::string id);
-  void ReceiveData();
+    std::string address = "tcp://";
+    zmqpp::context context;
+    zmqpp::socket socket = zmqpp::socket(context, zmqpp::socket_type::req);
+    void SendData(std::string &messageString);
+    std::string ReceiveData();
+public:
+    friend void SendMessage(Connection cont, std::string &id, std::string &message);
+    friend std::string ReceiveMessage(Connection cont, std::string &id);
+    Connection& operator =(const Connection &cont);
+    explicit Connection(std::string &argAddress);
+    Connection() = default;
+    ~Connection() = default;
+    Connection(Connection &cont);
 };
-static std::string host = "";
-static std::string dirName = "";
-static zmqpp::context context;
-static zmqpp::socket sendSocket(context, zmqpp::socket_type::req);
-static zmqpp::socket receiveSocket(context, zmqpp::socket_type::rep);
-void SendMessage(int id, std::string &message);
-void SendData(std::string &messageString);
-void SendData(std::string &messageString, zmqpp::socket &argSocket);
-std::string ReceiveData();
-void SendBigMessage(int id, std::string &filename);
-void RequestMessages(int id);
-bool ConnectToServer(std::string &address, int port);
-void SetDir(std::string dir);
-int BindSocket(zmqpp::socket &socket);
-std::string ReceiveData(zmqpp::socket &argSocket);
+void SendMessage(Connection cont, std::string &id, std::string &message);
+std::string ReceiveMessage(Connection cont, std::string &id);
 #endif //KP_OS_CLIENT_H

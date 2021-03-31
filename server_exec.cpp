@@ -9,7 +9,7 @@ int main(int argc, char* argv[]) {
     }
     config.close();
     int port;
-    Server* server = NULL;
+    Server* server;
     while(true){
         std::cin >> cmd;
         if(cmd == "server.out"){

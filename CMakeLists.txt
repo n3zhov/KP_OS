@@ -27,6 +27,7 @@ add_library(
         src/client.cpp
 )
 
+
 set_target_properties(client PROPERTIES
         PRIVATE_HEADER src/client.h
         )

@@ -40,31 +40,8 @@ bool Server::ServerUp(int port){
     return true;
 }
 
-
-std::string Server::ReceiveRequest(){
-    zmqpp::message message;
-    try {
-        this->socket.receive(message);
-    } catch(zmqpp::zmq_internal_exception& e) {
-        message = false;
-    }
-    std::string request;
-    message >> request;
-    return request;
-}
-
-void Server::SendData(std::string &messageString){
-    zmqpp::message message;
-    message << messageString;
-    try {
-        this->socket.send(message);
-    } catch(zmqpp::zmq_internal_exception& e) {
-        message = false;
-    }
-}
-
 void Server::SendReply(){
-    std::string request = ReceiveRequest();
+    std::string request = ReceiveData();
     std::istringstream in(request);
     static int type;
     static std::string id;
@@ -74,7 +51,8 @@ void Server::SendReply(){
     message.clear();
     if(type == Send){
         ++currentSize;
-        in >> message;
+        in.get();
+        getline(in, message);
         if(currentSize == maxSize){
             messageQueue[orderQueue.front()].pop();
             orderQueue.pop_front();
@@ -94,4 +72,26 @@ void Server::SendReply(){
         --currentSize;
         return;
     }
+}
+
+void Server::SendData(std::string &messageString){
+    zmqpp::message message;
+    message << messageString;
+    try {
+        this->socket.send(message);
+    } catch(zmqpp::zmq_internal_exception& e) {
+        message = false;
+    }
+}
+
+std::string Server::ReceiveData(){
+    zmqpp::message message;
+    try {
+        this->socket.receive(message);
+    } catch(zmqpp::zmq_internal_exception& e) {
+        message = false;
+    }
+    std::string request;
+    message >> request;
+    return request;
 }
